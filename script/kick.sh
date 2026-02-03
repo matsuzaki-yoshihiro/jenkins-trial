@@ -14,7 +14,7 @@ JOB_NAME="trial"
 echo "JENKINS_URL: ${JENKINS_URL}"
 
 # ジョブのビルドURL
-JOB_URL="${JENKINS_FULL_BUILD_URL}/job/${JOB_NAME}/build"
+JOB_URL="${JENKINS_FULL_BUILD_URL}/job/${JOB_NAME}/buildWithParameters"
 echo "JOB_URL: ${JOB_URL}"
 
 # Jenkins Crumb取得
