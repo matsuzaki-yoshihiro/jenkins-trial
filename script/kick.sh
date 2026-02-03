@@ -9,14 +9,12 @@ cd "$(dirname "$0")"
 
 source ./jenkins_env.sh
 
-JENKINS_FOLDER_NAME=${1:-"test-folder"}
 JOB_NAME="trial"
 
 echo "JENKINS_URL: ${JENKINS_URL}"
 
 # ジョブのビルドURL
-# フォルダ構成: [ENV_URL]/job/[FOLDER_NAME]/job/[JOB_NAME]
-JOB_URL="${JENKINS_FULL_BUILD_URL}/job/${JENKINS_FOLDER_NAME}/job/${JOB_NAME}/build"
+JOB_URL="${JENKINS_FULL_BUILD_URL}/job/${JOB_NAME}/build"
 echo "JOB_URL: ${JOB_URL}"
 
 # Jenkins Crumb取得
