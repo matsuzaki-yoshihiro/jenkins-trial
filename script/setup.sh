@@ -50,8 +50,10 @@ cat ~/.gitconfig
 # dn-cdc-lvgvm-misc-integ-agent.gitは${WORKSPACE}に展開されるが、
 # bitbakeの中で${WORKSPACE}がmainブランチに意図せず切り替わる為、
 # ${WORKSPACE}のスクリプトではなく、ここで取得したスクリプトを使う。
-git clone https://github.com/bevs3-cdc/dn-cdc-lvgvm-misc-integ-agent.git
-git -C dn-cdc-lvgvm-misc-integ-agent checkout "${GIT_COMMIT}"
+#git clone https://github.com/bevs3-cdc/dn-cdc-lvgvm-misc-integ-agent.git
+#git -C dn-cdc-lvgvm-misc-integ-agent checkout "${GIT_COMMIT}"
+git clone https://github.com/matsuzaki-yoshihiro/jenkins-trial.git
+git -C jenkins-trial checkout "${GIT_COMMIT}"
 
 ##################
 # Docker setting
