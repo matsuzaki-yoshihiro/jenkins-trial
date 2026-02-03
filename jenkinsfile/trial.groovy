@@ -46,7 +46,7 @@ pipeline {
                     git clean -ffdx
 
                     # setup environment
-                    ./setup.sh
+                    ./script/setup.sh
                     '''
                 }
             }
@@ -62,7 +62,7 @@ pipeline {
                     git clean -ffdx
 
                     # setup environment
-                    ./trial.sh ${option}
+                    ./script/trial.sh ${option}
                     '''
                 }
             }

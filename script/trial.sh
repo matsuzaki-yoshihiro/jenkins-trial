@@ -2,8 +2,6 @@
 set -ex
 cd "$(dirname "$0")"
 
-source ./jenkins_env.sh
-
 if [[ "$1" == "create" ]]; then
     ./create_jenkins_folder.sh
 elif [[ "$1" == "delete" ]]; then
