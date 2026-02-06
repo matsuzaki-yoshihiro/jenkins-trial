@@ -28,7 +28,7 @@ pipeline {
         }
         stage('build all') {
             steps {
-                build job: "${env.JENKINS_URL}/job/01-build-linux/job/feature/job/arene-next/job/build-all"
+                build job: "${env.JENKINS_URL}job/01-build-linux/job/feature/job/arene-next/job/build-all"
             }
         }
         stage('Set environment') {
