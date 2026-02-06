@@ -12,6 +12,7 @@ pipeline {
         https_proxy="http://in-proxy.geniie.net:8080"
         no_proxy="127.0.0.1,localhost,art.geniie.net,gitlab.geniie.net,jenkins.geniie.net"
         BRANCH = "${env.JOB_NAME.substring((env.JOB_NAME.indexOf("/")+1), env.JOB_NAME.lastIndexOf("/"))}"
+        JOB_DIR = "${env.JOB_NAME.substring(0, env.JOB_NAME.lastIndexOf("/"))}"
     }
 
     stages {
@@ -20,6 +21,7 @@ pipeline {
                 echo "JENKINS_URL is ${env.JENKINS_URL}"
                 // ジョブ名表示
                 echo "JOB_NAME is ${env.JOB_NAME}"
+                echo "JOB_DIR is ${JOB_DIR}"
                 // カレントディレクトリ表示
                 sh 'echo "pwd:`pwd`"'
                 // 作業ディレクトリとファイル一覧を表示
