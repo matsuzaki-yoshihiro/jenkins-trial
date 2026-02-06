@@ -17,6 +17,7 @@ pipeline {
     stages {
         stage('Show parameters') {
             steps {
+                echo "JENKINS_URL is ${env.JENKINS_URL}"
                 // ジョブ名表示
                 echo "JOB_NAME is ${env.JOB_NAME}"
                 // カレントディレクトリ表示
