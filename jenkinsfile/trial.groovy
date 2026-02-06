@@ -30,7 +30,7 @@ pipeline {
         }
         stage('build all') {
             steps {
-                build job: "${env.JENKINS_URL}01-build-linux/feature/arene-next/build-all"
+                build job: "01-build-linux/feature/arene-next/build-all"
             }
         }
         stage('Set environment') {
