@@ -10,9 +10,9 @@ DTEN_TAG=${5}
 TIER1_LATEST_HASH=${6}
 
 
-LOG_COMMENT="\n\
-\"■実行リポジトリ情報\n\"\
-${ARENE_REPO_NAME} : ${ARENE_TAG} : ${ARENE_MAIN_HASH}\n\
+LOG_COMMENT="<br>\
+\"■実行リポジトリ情報<br>\"\
+${ARENE_REPO_NAME} : ${ARENE_TAG} : ${ARENE_MAIN_HASH}<br>\
 ${DTEN_REPO_NAME} : ${DTEN_TAG} : ${TIER1_LATEST_HASH}\
 "
 
