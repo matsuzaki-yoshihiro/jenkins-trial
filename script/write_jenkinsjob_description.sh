@@ -9,17 +9,17 @@ cd "$(dirname "$0")"
 
 # 引数チェック
 if [[ $# -ne 2 ]]; then
-  echo "Usage: $0 <JENKINS_JOB_NAME> <JENKINS_JOB_DESCRIPTION>" >&2
+  echo "Usage: $0 <JENKINS_JOB_URL> <JENKINS_JOB_DESCRIPTION>" >&2
   exit 1
 fi
 
 source ./jenkins_env.sh
 
-JENKINS_JOB_NAME=${1}
+JENKINS_JOB_URL=${1}
 JENKINS_JOB_DESCRIPTION=${2}
 
-if [[ -z "${JENKINS_JOB_NAME}" ]]; then
-  echo "Error: Jenkinsジョブ名を指定してください" >&2
+if [[ -z "${JENKINS_JOB_URL}" ]]; then
+  echo "Error: JenkinsジョブURLを指定してください" >&2
   exit 1
 fi
 
@@ -29,7 +29,7 @@ if [[ -z "${JENKINS_JOB_DESCRIPTION}" ]]; then
 fi
 
 # Jenkins Job の存在確認
-JOB_CHECK_URL="${JENKINS_FULL_BUILD_URL}/job/${JENKINS_JOB_NAME}/api/json"
+JOB_CHECK_URL="${JENKINS_JOB_URL}/api/json"
 http_status=$(curl -L -s -o /dev/null -w "%{http_code}" \
   "${JOB_CHECK_URL}" \
   --user "${JENKINS_USERNAME}:${JENKINS_TOKEN}")
@@ -39,7 +39,7 @@ if [[ "$http_status" -ne 200 ]]; then
 fi
 
 # Jenkins Job 説明文更新
-JOB_URL="${JENKINS_FULL_BUILD_URL}/job/${JENKINS_JOB_NAME}/description"
+JOB_URL="${JENKINS_JOB_URL}/description"
 DESCRIPTION="${JENKINS_JOB_DESCRIPTION}"
 
 http_status=$(curl -L -s -o /dev/null -w "%{http_code}" -X POST \

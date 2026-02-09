@@ -70,20 +70,21 @@ pipeline {
                     git clean -ffdx
 
 #                    ./script/trial.sh ${option}
+
                     DESCRIPTION='\
-                    ■概要\n\
-                    　Arene:mainブランチ監視\n\
-                    　Areneの変更によるビルド問題を早期検出する事を目的としたJob\n\
                     \n\
+                    ■概要\n\
                     　Arene : mainブランチ\n\
                     　Tier1 : 集約最新タグ\n\
                     　の組み合わせでのビルド実行\n\
                     \n\
                     ■ビルドトリガー\n\
                     　90-misc/check-arene-next Jobにより環境の更新とこのJobの実行が行われる\'
+
+                    # DESCRIPTIONの先頭と各行頭の空白を削除
                     DESCRIPTION=$(echo "${DESCRIPTION}" | sed 's/^[ \t]*//;s/\\n[ \t]*/\\n/g')
 
-                    ./script/write_jenkinsjob_description.sh "trial" "${DESCRIPTION}"
+                    ./script/write_jenkinsjob_description.sh "https://jenkins.geniie.net/bevs3cdc/job/99-maintenance/job/trial_matsuzaki/job/trial" "${DESCRIPTION}"
                     '''
                 }
             }
