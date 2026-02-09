@@ -49,19 +49,23 @@ pipeline {
                     usernamePassword(credentialsId: "RC_BOT_CREDS"            , passwordVariable: 'RC_BOT_APIKEY'         , usernameVariable: 'RC_BOT_APIID'),
                     usernamePassword(credentialsId: "CONFLUENCE_TMCSG_CREDS"  , passwordVariable: 'TMCSG_CONFLUENCE_PAT'  , usernameVariable: 'TMCSG_CONFLUENCE_ID')
                     ]) {
-                    sh '''
-                    # clean workspace ("-ffdx" is not typo)
-                    git clean -ffdx
+                    script {
+                        sh '''
+                        # clean workspace ("-ffdx" is not typo)
+                        git clean -ffdx
 
-                    # setup environment
-                    ./script/setup.sh
+                        # setup environment
+                        ./script/setup.sh
+                        '''
 
-                    TIER1_LATEST_HASH=$(./script/get_github_repository_head_hash.sh "bevs3-cdc" "dn-cdc-lvgvm-26bev-repo" "feature/qcom-hqx.4.5.7.0-post-cs2")
-                    ARENE_MAIN_HASH=$(./script/get_github_repository_head_hash.sh "arene-cockpit-sdk" "arene-cockpit-sdk-26bev-repo" "main")
+                        def TIER1_LATEST_HASH = sh(script: './script/get_github_repository_head_hash.sh "bevs3-cdc" "dn-cdc-lvgvm-26bev-repo" "0.20.0.0-rc.5"', returnStdout: true).trim()
+                        def ARENE_MAIN_HASH = sh(script: './script/get_github_repository_head_hash.sh "arene-cockpit-sdk" "arene-cockpit-sdk-26bev-repo" "main"', returnStdout: true).trim()
 
-                    echo "ARENE_MAIN_HASH=${ARENE_MAIN_HASH}"
-                    echo "TIER1_LATEST_HASH=${TIER1_LATEST_HASH}"
-                    '''
+                        echo "ARENE_MAIN_HASH=${ARENE_MAIN_HASH}"
+                        echo "TIER1_LATEST_HASH=${TIER1_LATEST_HASH}"
+
+                        currentBuild.description = "ARENE_MAIN_HASH=${ARENE_MAIN_HASH}\nTIER1_LATEST_HASH=${TIER1_LATEST_HASH}"
+                    }
                 }
             }
         }
