@@ -46,7 +46,7 @@ http_status=$(curl -L -s -o /dev/null -w "%{http_code}" -X POST \
   "${JOB_URL}" \
   --user "${JENKINS_USERNAME}:${JENKINS_TOKEN}" \
   --data-urlencode "description=${DESCRIPTION}")
-if [[ "$http_status" -ne 200 ]]; then
+if [[ "$http_status" -ne 200 && "$http_status" -ne 204 ]]; then
   echo "Error: Jenkinsジョブ説明文更新失敗 (HTTP status: $http_status)" >&2
   exit 1
 fi
