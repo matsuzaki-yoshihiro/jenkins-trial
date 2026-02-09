@@ -27,9 +27,13 @@ if [[ -z "${GITHUB_TOKEN}" ]]; then
   echo "Error: GitHubトークンを指定してください" >&2
   exit 1
 fi
-# GitHub APIを使用してHEADハッシュを取得
-# branches -> commits に変更することで、ブランチ名だけでなくタグ名でも取得可能にする
-API_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${GITHUB_BRANCH}"
+if [[ "${GITHUB_BRANCH}" == *"/"* ]]; then
+  # スラッシュを含む場合はURLエンコードする (e.g. feature/abc -> feature%2Fabc)
+  GITHUB_BRANCH_ENCODED=$(echo "${GITHUB_BRANCH}" | sed 's/\//%2F/g')
+  API_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${GITHUB_BRANCH_ENCODED}"
+else
+  API_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${GITHUB_BRANCH}"
+fi
 
 # 認証トークンがある場合はヘッダーに追加
 CURL_OPTS=(-s)
