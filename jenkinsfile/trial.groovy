@@ -71,15 +71,15 @@ pipeline {
 
 #                    ./script/trial.sh ${option}
                     DESCRIPTION='\
-                    ■概要\
-                    　Arene:mainブランチ監視\
-                    　Areneの変更によるビルド問題を早期検出する事を目的としたJob\
-                    \
-                    　Arene : mainブランチ\
-                    　Tier1 : 集約最新タグ\
-                    　の組み合わせでのビルド実行\
-                    \
-                    ■ビルドトリガー\
+                    ■概要\n\
+                    　Arene:mainブランチ監視\n\
+                    　Areneの変更によるビルド問題を早期検出する事を目的としたJob\n\
+                    \n\
+                    　Arene : mainブランチ\n\
+                    　Tier1 : 集約最新タグ\n\
+                    　の組み合わせでのビルド実行\n\
+                    \n\
+                    ■ビルドトリガー\n\
                     　毎週土曜日 AM2:00 90-misc/check-arene-next Jobにより環境の更新と自動実行'
 
                     ./script/write_jenkinsjob_description.sh "trial" "${DESCRIPTION}"
