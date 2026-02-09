@@ -58,13 +58,13 @@ pipeline {
                         ./script/setup.sh
                         '''
 
-                        def TIER1_LATEST_HASH = sh(script: "./script/get_github_repository_head_hash.sh \"bevs3-cdc\" \"dn-cdc-lvgvm-26bev-repo\" \"${option}\"", returnStdout: true).trim()
-                        def ARENE_MAIN_HASH = sh(script: "./script/get_github_repository_head_hash.sh \"arene-cockpit-sdk\" \"arene-cockpit-sdk-26bev-repo\" \"main\"", returnStdout: true).trim()
+                        //def TIER1_LATEST_HASH = sh(script: "./script/get_github_repository_head_hash.sh \"bevs3-cdc\" \"dn-cdc-lvgvm-26bev-repo\" \"${option}\"", returnStdout: true).trim()
+                        //def ARENE_MAIN_HASH = sh(script: "./script/get_github_repository_head_hash.sh \"arene-cockpit-sdk\" \"arene-cockpit-sdk-26bev-repo\" \"main\"", returnStdout: true).trim()
 
-                        echo "ARENE_MAIN_HASH=${ARENE_MAIN_HASH}"
-                        echo "TIER1_LATEST_HASH=${TIER1_LATEST_HASH}"
+                        //echo "ARENE_MAIN_HASH=${ARENE_MAIN_HASH}"
+                        //echo "TIER1_LATEST_HASH=${TIER1_LATEST_HASH}"
 
-                        def LOG_COMMENT = sh(script: "./script/edit_comment.sh \"arene-cockpit-sdk-26bev-repo\" \"main\" \"${ARENE_MAIN_HASH}\" \"dn-cdc-lvgvm-26bev-repo\" \"${option}\" \"${TIER1_LATEST_HASH}\"", returnStdout: true).trim()
+                        def LOG_COMMENT = sh(script: "./script/edit_comment.sh \"arene-cockpit-sdk-26bev-repo\" \"main\" \"dn-cdc-lvgvm-26bev-repo\" \"${option}\" ", returnStdout: true).trim()
 
                         currentBuild.description = "${LOG_COMMENT}"
                     }
