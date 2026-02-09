@@ -17,3 +17,4 @@ ${DTEN_REPO_NAME} : ${DTEN_TAG} : ${TIER1_LATEST_HASH}\
 "
 
 echo "${LOG_COMMENT}" >&2
+echo "${LOG_COMMENT}"
