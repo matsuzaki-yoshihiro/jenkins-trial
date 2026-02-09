@@ -64,7 +64,7 @@ pipeline {
                         echo "ARENE_MAIN_HASH=${ARENE_MAIN_HASH}"
                         echo "TIER1_LATEST_HASH=${TIER1_LATEST_HASH}"
 
-                        def LOG_COMMENT = sh(script: "./script/edit_comment.sh\" \"arene-cockpit-sdk-26bev-repo\" \"${ARENE_MAIN_HASH}\" \"dn-cdc-lvgvm-26bev-repo\" \"${TIER1_LATEST_HASH}\"", returnStdout: true).trim()
+                        def LOG_COMMENT = sh(script: "./script/edit_comment.sh \"arene-cockpit-sdk-26bev-repo\" \"${ARENE_MAIN_HASH}\" \"dn-cdc-lvgvm-26bev-repo\" \"${TIER1_LATEST_HASH}\"", returnStdout: true).trim()
 
                         currentBuild.description = "${LOG_COMMENT}"
                     }
