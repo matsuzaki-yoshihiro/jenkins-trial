@@ -69,7 +69,7 @@ pipeline {
                     # clean workspace ("-ffdx" is not typo)
                     git clean -ffdx
 
-//                    ./script/trial.sh ${option}
+#                    ./script/trial.sh ${option}
                     ./script/write_jenkinsjob_description.sh "trial" "write description test $(date)"
                     '''
                 }
