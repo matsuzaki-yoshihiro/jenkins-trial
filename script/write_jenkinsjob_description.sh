@@ -41,13 +41,11 @@ fi
 # Jenkins Job 説明文更新
 JOB_URL="${JENKINS_FULL_BUILD_URL}/job/${JENKINS_JOB_NAME}/description"
 DESCRIPTION="${JENKINS_JOB_DESCRIPTION}"
-DESCRIPTION_XML="<?xml version='1.0' encoding='UTF-8'?>\
-<description>${DESCRIPTION}</description>"
+
 http_status=$(curl -L -s -o /dev/null -w "%{http_code}" -X POST \
   "${JOB_URL}" \
   --user "${JENKINS_USERNAME}:${JENKINS_TOKEN}" \
-  --header "Content-type: application/xml" \
-  --data-binary "${DESCRIPTION_XML}")
+  --data-urlencode "description=${DESCRIPTION}")
 if [[ "$http_status" -ne 200 ]]; then
   echo "Error: Jenkinsジョブ説明文更新失敗 (HTTP status: $http_status)" >&2
   exit 1
