@@ -1,8 +1,9 @@
 #!/bin/bash
 #################################################
-# 注意
-#################################################
-# JENKINS_USERNAME, JENKINS_TOKENをexport前提
+# 概要:
+#   - Jenkinsジョブ説明文更新スクリプト
+# 注意:
+#   JENKINS_USERNAME, JENKINS_TOKENをexport前提
 #################################################
 set -ex
 cd "$(dirname "$0")"
@@ -12,8 +13,6 @@ if [[ $# -ne 2 ]]; then
   echo "Usage: $0 <JENKINS_JOB_URL> <JENKINS_JOB_DESCRIPTION>" >&2
   exit 1
 fi
-
-source ./jenkins_env.sh
 
 JENKINS_JOB_URL=${1}
 JENKINS_JOB_DESCRIPTION=${2}
@@ -40,12 +39,11 @@ fi
 
 # Jenkins Job 説明文更新
 JOB_URL="${JENKINS_JOB_URL}/description"
-DESCRIPTION="${JENKINS_JOB_DESCRIPTION}"
 
 http_status=$(curl -L -s -o /dev/null -w "%{http_code}" -X POST \
   "${JOB_URL}" \
   --user "${JENKINS_USERNAME}:${JENKINS_TOKEN}" \
-  --data-urlencode "description=${DESCRIPTION}")
+  --data-urlencode "description=${JENKINS_JOB_DESCRIPTION}")
 if [[ "$http_status" -ne 200 && "$http_status" -ne 204 ]]; then
   echo "Error: Jenkinsジョブ説明文更新失敗 (HTTP status: $http_status)" >&2
   exit 1
