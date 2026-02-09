@@ -80,7 +80,8 @@ pipeline {
                     　の組み合わせでのビルド実行\n\
                     \n\
                     ■ビルドトリガー\n\
-                    　毎週土曜日 AM2:00 90-misc/check-arene-next Jobにより環境の更新と自動実行'
+                    　90-misc/check-arene-next Jobにより環境の更新とこのJobの実行が行われる\'
+                    DESCRIPTION=$(echo "${DESCRIPTION}" | sed 's/^[ \t]*//;s/\\n[ \t]*/\\n/g')
 
                     ./script/write_jenkinsjob_description.sh "trial" "${DESCRIPTION}"
                     '''
