@@ -56,7 +56,7 @@ pipeline {
                     # setup environment
                     ./script/setup.sh
 
-                    TIER1_LATEST_HASH=$(./script/get_github_repository_head_hash.sh "bevs3-cdc" "dn-cdc-lvgvm-26bev-repo" "0.20.0-rc.5")
+                    TIER1_LATEST_HASH=$(./script/get_github_repository_head_hash.sh "bevs3-cdc" "dn-cdc-lvgvm-26bev-repo" "0.20.0.0-rc.5")
                     ARENE_MAIN_HASH=$(./script/get_github_repository_head_hash.sh "arene-cockpit-sdk" "arene-cockpit-sdk-26bev-repo" "main")
 
                     echo "ARENE_MAIN_HASH=${ARENE_MAIN_HASH}"
