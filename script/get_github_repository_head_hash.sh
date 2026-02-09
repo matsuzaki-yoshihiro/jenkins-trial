@@ -28,7 +28,8 @@ if [[ -z "${GITHUB_TOKEN}" ]]; then
   exit 1
 fi
 # GitHub APIを使用してHEADハッシュを取得
-API_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/branches/${GITHUB_BRANCH}"
+# branches -> commits に変更することで、ブランチ名だけでなくタグ名でも取得可能にする
+API_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${GITHUB_BRANCH}"
 
 # 認証トークンがある場合はヘッダーに追加
 CURL_OPTS=(-s)
