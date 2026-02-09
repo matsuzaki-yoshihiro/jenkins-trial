@@ -28,11 +28,11 @@ pipeline {
                 sh 'ls -la'
             }
         }
-        stage('build all') {
-            steps {
-                build job: "01-build-linux/feature/arene-next/build-all"
-            }
-        }
+//        stage('build all') {
+//           steps {
+//                build job: "01-build-linux/feature/arene-next/build-all"
+//            }
+//        }
         stage('Set environment') {
             steps {
                 withCredentials([
@@ -69,8 +69,8 @@ pipeline {
                     # clean workspace ("-ffdx" is not typo)
                     git clean -ffdx
 
-                    # setup environment
-                    ./script/trial.sh ${option}
+//                    ./script/trial.sh ${option}
+                    ./script/write_jenkinsjob_description.sh "trial" "write description test $(date)"
                     '''
                 }
             }

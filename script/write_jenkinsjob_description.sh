@@ -1,0 +1,55 @@
+#!/bin/bash
+#################################################
+# 注意
+#################################################
+# JENKINS_USERNAME, JENKINS_TOKENをexport前提
+#################################################
+set -ex
+cd "$(dirname "$0")"
+
+# 引数チェック
+if [[ $# -ne 2 ]]; then
+  echo "Usage: $0 <JENKINS_JOB_NAME> <JENKINS_JOB_DESCRIPTION>" >&2
+  exit 1
+fi
+
+source ./jenkins_env.sh
+
+JENKINS_JOB_NAME=${1}
+JENKINS_JOB_DESCRIPTION=${2}
+
+if [[ -z "${JENKINS_JOB_NAME}" ]]; then
+  echo "Error: Jenkinsジョブ名を指定してください" >&2
+  exit 1
+fi
+
+if [[ -z "${JENKINS_JOB_DESCRIPTION}" ]]; then
+  echo "Error: Jenkinsジョブ説明文を指定してください" >&2
+  exit 1
+fi
+
+# Jenkins Job の存在確認
+JOB_CHECK_URL="${JENKINS_FULL_BUILD_URL}/job/${JENKINS_JOB_NAME}/api/json"
+http_status=$(curl -L -s -o /dev/null -w "%{http_code}" \
+  "${JOB_CHECK_URL}" \
+  --user "${JENKINS_USERNAME}:${JENKINS_TOKEN}")
+if [[ "$http_status" -ne 200 ]]; then
+  echo "Error: Jenkinsジョブが存在しません (HTTP status: $http_status)" >&2
+  exit 1
+fi
+
+# Jenkins Job 説明文更新
+JOB_URL="${JENKINS_FULL_BUILD_URL}/job/${JENKINS_JOB_NAME}/description"
+DESCRIPTION="${JENKINS_JOB_DESCRIPTION}"
+DESCRIPTION_XML="<?xml version='1.0' encoding='UTF-8'?>\
+<description>${DESCRIPTION}</description>"
+http_status=$(curl -L -s -o /dev/null -w "%{http_code}" -X POST \
+  "${JOB_URL}" \
+  --user "${JENKINS_USERNAME}:${JENKINS_TOKEN}" \
+  --header "Content-type: application/xml" \
+  --data-binary "${DESCRIPTION_XML}")
+if [[ "$http_status" -ne 200 ]]; then
+  echo "Error: Jenkinsジョブ説明文更新失敗 (HTTP status: $http_status)" >&2
+  exit 1
+fi
+echo "Jenkinsジョブ説明文更新成功"
