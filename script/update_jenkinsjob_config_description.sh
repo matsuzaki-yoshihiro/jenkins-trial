@@ -41,12 +41,16 @@ fi
 # config.xmlを取得
 JOB_XML="$(curl -s -u "${JENKINS_USERNAME}:${JENKINS_TOKEN}" "${JENKINS_JOB_URL}/config.xml")"
 
+echo "JOB_XML:${JOB_XML}" >&2
+
 # config.xmlのdescription要素を更新
 UPDATED_JOB_XML="$(echo "${JOB_XML}" | xmlstarlet ed -u "/project/description" -v "${JENKINS_JOB_DESCRIPTION}")"
 if [[ -z "${UPDATED_JOB_XML}" ]]; then
   echo "Error: config.xmlの更新に失敗しました" >&2
   exit 1
 fi
+
+echo "UPDATED_JOB_XML:${UPDATED_JOB_XML}" >&2
 
 # 更新したconfig.xmlをJenkinsに反映
 http_status=$(curl -L \
