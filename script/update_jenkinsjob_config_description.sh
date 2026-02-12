@@ -38,6 +38,19 @@ if [[ "$http_status" -ne 200 ]]; then
   exit 1
 fi
 
+# JenkinsのルートURLを推定 (Crumb取得用)
+JENKINS_ROOT_URL=$(echo "${JENKINS_JOB_URL}" | sed 's|/job/.*||')
+
+# Crumb（CSRFトークン）を取得
+CRUMB_VALUE=$(curl -s -u "${JENKINS_USERNAME}:${JENKINS_TOKEN}" "${JENKINS_ROOT_URL}/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,\":\",//crumb)")
+CRUMB_HEADER=""
+if [[ "$CRUMB_VALUE" == *"Jenkins-Crumb"* ]]; then
+  echo "Crumb取得成功: ${CRUMB_VALUE}" >&2
+  CRUMB_HEADER="${CRUMB_VALUE}"
+else
+  echo "Crumb取得スキップ (または失敗): ${CRUMB_VALUE}" >&2
+fi
+
 # config.xmlを取得
 JOB_XML="$(curl -s -u "${JENKINS_USERNAME}:${JENKINS_TOKEN}" "${JENKINS_JOB_URL}/config.xml")"
 
@@ -53,17 +66,20 @@ fi
 echo "UPDATED_JOB_XML:${UPDATED_JOB_XML}" >&2
 
 # 更新したconfig.xmlをJenkinsに反映
-http_status=$(curl -L \
-  -s \
-  -o error_response.html \
-  -w "%{http_code}" \
-  -X POST \
-  -u "${JENKINS_USERNAME}:${JENKINS_TOKEN}" \
-  -H "Content-Type: application/xml" \
-  --data-binary "${UPDATED_JOB_XML}" "${JENKINS_JOB_URL}/config.xml")
+CURL_CMD=(curl -L -s -o error_response.html -w "%{http_code}" -X POST)
+CURL_CMD+=(-u "${JENKINS_USERNAME}:${JENKINS_TOKEN}")
+CURL_CMD+=(-H "Content-Type: application/xml")
+if [[ -n "${CRUMB_HEADER}" ]]; then
+  CURL_CMD+=(-H "${CRUMB_HEADER}")
+fi
+CURL_CMD+=(--data-binary "${UPDATED_JOB_XML}" "${JENKINS_JOB_URL}/config.xml")
+
+http_status=$("${CURL_CMD[@]}")
+
 if [[ "$http_status" -ne 200 && "$http_status" -ne 204 ]]; then
   echo "Error: Jenkinsジョブconfig.xml更新失敗 (HTTP status: $http_status)" >&2
-  echo error_response.htmlの内容:
-  cat error_response.html exit 1 >&2
+  echo "error_response.htmlの内容:" >&2
+  cat error_response.html >&2
+  exit 1
 fi
 echo "Jenkinsジョブconfig.xml更新成功"
