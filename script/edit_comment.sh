@@ -27,4 +27,23 @@ ${TIER1_LATEST_HASH}
 "
 
 echo "${LOG_COMMENT}" >&2
+
+JENKINS_JOB_URL="https://jenkins.geniie.net/bevs3cdc/job/99-maintenance/job/trial_matsuzaki/job/test-folder"
+
+docker run \
+  --rm \
+  -e http_proxy="${http_proxy}" \
+  -e https_proxy="${https_proxy}" \
+  -e no_proxy="${no_proxy}" \
+  -e JENKINS_USERNAME="${JENKINS_USERNAME}" \
+  -e JENKINS_TOKEN="${JENKINS_TOKEN}" \
+  -v "${HOME}":/home/hosthome:ro \
+  -v "$(pwd)":/workdir \
+  --name poky-"$(id -un)" \
+  art.geniie.net/bevs3cdc-docker-tier1/poky:ubuntu-22.04 \
+  --workdir=/workdir \
+  /bin/bash -c "\
+            bash -x ./update_jenkinsjob_config_description.sh \"${JENKINS_JOB_URL}\" \"${LOG_COMMENT}\" >&2 \
+        " >&2
+
 echo "${LOG_COMMENT}"
