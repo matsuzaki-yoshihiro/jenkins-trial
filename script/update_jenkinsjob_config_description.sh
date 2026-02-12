@@ -57,8 +57,11 @@ if [[ -z "${CRUMB_HEADER}" || "${CRUMB_HEADER}" != *":"* || "${CRUMB_HEADER}" ==
   CRUMB_HEADER=""
 fi
 
-# config.xmlを取得 (Cookieを使用)
-JOB_XML="$(curl -s -b "${COOKIE_JAR}" "${JENKINS_JOB_URL}/config.xml")"
+# config.xmlを取得 (Cookie + Basic認証)
+JOB_XML="$(curl -s \
+  -b "${COOKIE_JAR}" \
+  --user "${JENKINS_USERNAME}:${JENKINS_TOKEN}" \
+  "${JENKINS_JOB_URL}/config.xml")"
 if [[ -z "${JOB_XML}" ]]; then
   echo "Error: Jenkinsジョブのconfig.xml取得に失敗しました" >&2
   exit 1
@@ -81,6 +84,7 @@ http_status=$(
   curl -s -o error_response.html -w "%{http_code}" -X POST \
     "${JENKINS_JOB_URL}/config.xml" \
     -b "${COOKIE_JAR}" \
+    --user "${JENKINS_USERNAME}:${JENKINS_TOKEN}" \
     -H "Content-Type: application/xml; charset=UTF-8" \
     ${CRUMB_HEADER:+-H "${CRUMB_HEADER}"} \
     --data-binary @"-" << EOF
