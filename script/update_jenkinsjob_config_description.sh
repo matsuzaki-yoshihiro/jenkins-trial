@@ -38,10 +38,34 @@ if [[ "$http_status" -ne 200 ]]; then
   exit 1
 fi
 
-# config.xmlを取得
-JOB_XML="$(curl -s -u "${JENKINS_USERNAME}:${JENKINS_TOKEN}" "${JENKINS_JOB_URL}/config.xml")"
+# JenkinsのルートURLを推定 (Crumb取得用)
+JENKINS_ROOT_URL=$(echo "${JENKINS_JOB_URL}" | sed 's|/job/.*||')
+
+# Cookie保存用の一時ファイルを作成 (Crumb/POSTで同一セッションを維持する)
+COOKIE_JAR="$(mktemp)"
+trap 'rm -f "${COOKIE_JAR}"' EXIT
+
+# Crumb（CSRFトークン）を取得
+# 例: Jenkins-Crumb:xxxxxxxx の形式が返る
+CRUMB_HEADER=$(curl -s \
+  -c "${COOKIE_JAR}" \
+  --user "${JENKINS_USERNAME}:${JENKINS_TOKEN}" \
+  "${JENKINS_ROOT_URL}/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,\":\",//crumb)")
+
+if [[ -z "${CRUMB_HEADER}" || "${CRUMB_HEADER}" != *":"* || "${CRUMB_HEADER}" == *"<"* ]]; then
+  echo "Warning: Crumb取得に失敗、または形式が不正です: ${CRUMB_HEADER}" >&2
+  CRUMB_HEADER=""
+fi
+
+# config.xmlを取得 (Cookieを使用)
+JOB_XML="$(curl -s -b "${COOKIE_JAR}" "${JENKINS_JOB_URL}/config.xml")"
 if [[ -z "${JOB_XML}" ]]; then
   echo "Error: Jenkinsジョブのconfig.xml取得に失敗しました" >&2
+  exit 1
+fi
+
+if [[ "${JOB_XML}" == *"<!DOCTYPE html"* || "${JOB_XML}" == *"<html"* ]]; then
+  echo "Error: config.xmlではなくHTMLが返りました。認証/権限不足の可能性があります" >&2
   exit 1
 fi
 
@@ -53,15 +77,18 @@ if [[ -z "${UPDATED_JOB_XML}" ]]; then
 fi
 
 # 更新したconfig.xmlをJenkinsに反映
-http_status=$(curl -s \
-  -o error_response.html \
-  -w "%{http_code}" \
-  -X POST "${JENKINS_JOB_URL}/config.xml" \
-  --user "${JENKINS_USERNAME}:${JENKINS_TOKEN}" \
-  -H "Content-Type: application/xml" \
-  --data-binary "${UPDATED_JOB_XML}")
+http_status=$(
+  curl -s -o error_response.html -w "%{http_code}" -X POST \
+    "${JENKINS_JOB_URL}/config.xml" \
+    -b "${COOKIE_JAR}" \
+    -H "Content-Type: application/xml; charset=UTF-8" \
+    ${CRUMB_HEADER:+-H "${CRUMB_HEADER}"} \
+    --data-binary @"-" << EOF
+${UPDATED_JOB_XML}
+EOF
+)
 
-if [[ "$http_status" -ne 200 ]]; then
+if [[ "$http_status" -ne 200 && "$http_status" -ne 204 ]]; then
   echo "Error: Jenkinsジョブのconfig.xml更新に失敗しました (HTTP status: $http_status)" >&2
   echo "Response:" >&2
   cat error_response.html >&2
