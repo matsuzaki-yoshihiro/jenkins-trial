@@ -38,27 +38,12 @@ if [[ "$http_status" -ne 200 ]]; then
   exit 1
 fi
 
-# JenkinsのルートURLを推定 (Crumb取得用)
-JENKINS_ROOT_URL=$(echo "${JENKINS_JOB_URL}" | sed 's|/job/.*||')
-
-# Cookie保存用の一時ファイルを作成
-COOKIE_JAR=$(mktemp)
-trap 'rm -f "${COOKIE_JAR}"' EXIT
-
-# Crumb（CSRFトークン）を取得 (Cookieを保存)
-CRUMB_VALUE=$(curl -s -c "${COOKIE_JAR}" -u "${JENKINS_USERNAME}:${JENKINS_TOKEN}" "${JENKINS_ROOT_URL}/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,\":\",//crumb)")
-CRUMB_HEADER=""
-if [[ "$CRUMB_VALUE" == *"Jenkins-Crumb"* ]]; then
-  echo "Crumb取得成功: ${CRUMB_VALUE}" >&2
-  CRUMB_HEADER="${CRUMB_VALUE}"
-else
-  echo "Crumb取得スキップ (または失敗): ${CRUMB_VALUE}" >&2
-fi
-
 # config.xmlを取得
 JOB_XML="$(curl -s -u "${JENKINS_USERNAME}:${JENKINS_TOKEN}" "${JENKINS_JOB_URL}/config.xml")"
-
-echo "JOB_XML:${JOB_XML}" >&2
+if [[ -z "${JOB_XML}" ]]; then
+  echo "Error: Jenkinsジョブのconfig.xml取得に失敗しました" >&2
+  exit 1
+fi
 
 # config.xmlのdescription要素を更新
 UPDATED_JOB_XML="$(echo "${JOB_XML}" | xmlstarlet ed -u "/*/description" -v "${JENKINS_JOB_DESCRIPTION}")"
@@ -67,23 +52,17 @@ if [[ -z "${UPDATED_JOB_XML}" ]]; then
   exit 1
 fi
 
-echo "UPDATED_JOB_XML:${UPDATED_JOB_XML}" >&2
-
 # 更新したconfig.xmlをJenkinsに反映
-CURL_CMD=(curl -L -s -b "${COOKIE_JAR}" -o error_response.html -w "%{http_code}" -X POST)
-CURL_CMD+=(-u "${JENKINS_USERNAME}:${JENKINS_TOKEN}")
-CURL_CMD+=(-H "Content-Type: application/xml")
-if [[ -n "${CRUMB_HEADER}" ]]; then
-  CURL_CMD+=(-H "${CRUMB_HEADER}")
-fi
-CURL_CMD+=(--data-binary "${UPDATED_JOB_XML}" "${JENKINS_JOB_URL}/config.xml")
-
-http_status=$("${CURL_CMD[@]}")
-
-if [[ "$http_status" -ne 200 && "$http_status" -ne 204 ]]; then
-  echo "Error: Jenkinsジョブconfig.xml更新失敗 (HTTP status: $http_status)" >&2
-  echo "error_response.htmlの内容:" >&2
-  cat error_response.html >&2
+HTTP_STATUS=$(
+  curl -s -o /dev/null -w "%{http_code}" -X POST \
+    "${JENKINS_JOB_URL}/config.xml" \
+    --user "${JENKINS_USERNAME}:${JENKINS_TOKEN}" \
+    -H "Content-Type: application/xml" \
+    --data-binary @"-" << EOF
+${UPDATED_JOB_XML}
+EOF
+)
+if [[ "$HTTP_STATUS" -ne 200 ]]; then
+  echo "Error: Jenkinsジョブのconfig.xml更新に失敗しました (HTTP status: $HTTP_STATUS)" >&2
   exit 1
 fi
-echo "Jenkinsジョブconfig.xml更新成功"
