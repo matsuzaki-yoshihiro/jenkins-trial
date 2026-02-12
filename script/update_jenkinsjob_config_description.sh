@@ -55,7 +55,7 @@ echo "UPDATED_JOB_XML:${UPDATED_JOB_XML}" >&2
 # 更新したconfig.xmlをJenkinsに反映
 http_status=$(curl -L \
   -s \
-  -o /dev/null \
+  -o error_response.html \
   -w "%{http_code}" \
   -X POST \
   -u "${JENKINS_USERNAME}:${JENKINS_TOKEN}" \
@@ -66,3 +66,5 @@ if [[ "$http_status" -ne 200 && "$http_status" -ne 204 ]]; then
   exit 1
 fi
 echo "Jenkinsジョブconfig.xml更新成功"
+echo error_response.htmlの内容:
+cat error_response.html >&2
