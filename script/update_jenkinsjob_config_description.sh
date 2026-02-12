@@ -41,8 +41,12 @@ fi
 # JenkinsのルートURLを推定 (Crumb取得用)
 JENKINS_ROOT_URL=$(echo "${JENKINS_JOB_URL}" | sed 's|/job/.*||')
 
-# Crumb（CSRFトークン）を取得
-CRUMB_VALUE=$(curl -s -u "${JENKINS_USERNAME}:${JENKINS_TOKEN}" "${JENKINS_ROOT_URL}/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,\":\",//crumb)")
+# Cookie保存用の一時ファイルを作成
+COOKIE_JAR=$(mktemp)
+trap 'rm -f "${COOKIE_JAR}"' EXIT
+
+# Crumb（CSRFトークン）を取得 (Cookieを保存)
+CRUMB_VALUE=$(curl -s -c "${COOKIE_JAR}" -u "${JENKINS_USERNAME}:${JENKINS_TOKEN}" "${JENKINS_ROOT_URL}/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,\":\",//crumb)")
 CRUMB_HEADER=""
 if [[ "$CRUMB_VALUE" == *"Jenkins-Crumb"* ]]; then
   echo "Crumb取得成功: ${CRUMB_VALUE}" >&2
@@ -66,7 +70,7 @@ fi
 echo "UPDATED_JOB_XML:${UPDATED_JOB_XML}" >&2
 
 # 更新したconfig.xmlをJenkinsに反映
-CURL_CMD=(curl -L -s -o error_response.html -w "%{http_code}" -X POST)
+CURL_CMD=(curl -L -s -b "${COOKIE_JAR}" -o error_response.html -w "%{http_code}" -X POST)
 CURL_CMD+=(-u "${JENKINS_USERNAME}:${JENKINS_TOKEN}")
 CURL_CMD+=(-H "Content-Type: application/xml")
 if [[ -n "${CRUMB_HEADER}" ]]; then
