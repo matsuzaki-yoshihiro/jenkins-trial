@@ -63,8 +63,7 @@ http_status=$(curl -L \
   --data-binary "${UPDATED_JOB_XML}" "${JENKINS_JOB_URL}/config.xml")
 if [[ "$http_status" -ne 200 && "$http_status" -ne 204 ]]; then
   echo "Error: Jenkinsジョブconfig.xml更新失敗 (HTTP status: $http_status)" >&2
-  exit 1
+  echo error_response.htmlの内容:
+  cat error_response.html exit 1 >&2
 fi
 echo "Jenkinsジョブconfig.xml更新成功"
-echo error_response.htmlの内容:
-cat error_response.html >&2
