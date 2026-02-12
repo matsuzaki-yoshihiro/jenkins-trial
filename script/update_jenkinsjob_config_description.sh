@@ -53,16 +53,17 @@ if [[ -z "${UPDATED_JOB_XML}" ]]; then
 fi
 
 # 更新したconfig.xmlをJenkinsに反映
-HTTP_STATUS=$(
-  curl -s -o /dev/null -w "%{http_code}" -X POST \
-    "${JENKINS_JOB_URL}/config.xml" \
-    --user "${JENKINS_USERNAME}:${JENKINS_TOKEN}" \
-    -H "Content-Type: application/xml" \
-    --data-binary @"-" << EOF
-${UPDATED_JOB_XML}
-EOF
-)
-if [[ "$HTTP_STATUS" -ne 200 ]]; then
-  echo "Error: Jenkinsジョブのconfig.xml更新に失敗しました (HTTP status: $HTTP_STATUS)" >&2
+http_status=$(curl -s \
+  -o error_response.html \
+  -w "%{http_code}" \
+  -X POST "${JENKINS_JOB_URL}/config.xml" \
+  --user "${JENKINS_USERNAME}:${JENKINS_TOKEN}" \
+  -H "Content-Type: application/xml" \
+  --data-binary "${UPDATED_JOB_XML}")
+
+if [[ "$http_status" -ne 200 ]]; then
+  echo "Error: Jenkinsジョブのconfig.xml更新に失敗しました (HTTP status: $http_status)" >&2
+  echo "Response:" >&2
+  cat error_response.html >&2
   exit 1
 fi
