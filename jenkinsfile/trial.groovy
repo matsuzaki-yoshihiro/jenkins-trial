@@ -26,14 +26,14 @@ pipeline {
                 sh 'echo "pwd:`pwd`"'
                 // 作業ディレクトリとファイル一覧を表示
                 sh 'ls -la'
+
+                sh './script/trap_test.sh'
             }
         }
-//        stage('build all') {
-//           steps {
-//                build job: "01-build-linux/feature/arene-next/build-all"
-//            }
-//        }
         stage('Set environment') {
+            when {
+                expression { return false }
+            }
             steps {
                 withCredentials([
                     usernamePassword(credentialsId: "GENIIE_ARTIFACTORY_CREDS", passwordVariable: 'GENIIE_ART_APIKEY'     , usernameVariable: 'GENIIE_ART_ID'),
