@@ -16,7 +16,15 @@ pipeline {
     }
 
     stages {
+        stage('trap test') {
+            steps {
+                sh './script/trap_test.sh'
+            }
+        }
         stage('Show parameters') {
+            when {
+                expression { return false }
+            }
             steps {
                 echo "JENKINS_URL is ${env.JENKINS_URL}"
                 // ジョブ名表示
@@ -26,8 +34,6 @@ pipeline {
                 sh 'echo "pwd:`pwd`"'
                 // 作業ディレクトリとファイル一覧を表示
                 sh 'ls -la'
-
-                sh './script/trap_test.sh'
             }
         }
         stage('Set environment') {
