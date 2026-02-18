@@ -47,7 +47,7 @@ pipeline {
 
                     // DTEN_TAGがdefaultの場合、最新タグを取得
                     if (DTEN_TAG == "default") {
-                        env.DTEN_TAG = sh(script: "git describe --tags \$(git rev-list --tags --max-count=1)", returnStdout: true).trim()
+                        env.DTEN_TAG = sh(script: "git describe --tags $(git rev-list --tags --max-count=1)", returnStdout: true).trim()
                     }
                 }
 
