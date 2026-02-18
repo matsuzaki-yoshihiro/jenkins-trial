@@ -3,7 +3,7 @@ set -ex
 cd "$(dirname "$0")"
 
 MK_TEMP_DIR="$(mktemp -d)"
-trap 'rm -rf "${MK_TEMP_DIR}"' EXIT 1 2 15
+trap 'rm -rf "${MK_TEMP_DIR}"' EXIT HUP INT TERM
 
 echo "MK_TEMP_DIR: ${MK_TEMP_DIR}"
 
