@@ -17,14 +17,14 @@ pipeline {
 
     stages {
         stage('trap test') {
+            when {
+                expression { return false }
+            }
             steps {
                 sh './script/trap_test.sh'
             }
         }
         stage('Show parameters') {
-            when {
-                expression { return false }
-            }
             steps {
                 echo "JENKINS_URL is ${env.JENKINS_URL}"
                 // ジョブ名表示
@@ -34,6 +34,25 @@ pipeline {
                 sh 'echo "pwd:`pwd`"'
                 // 作業ディレクトリとファイル一覧を表示
                 sh 'ls -la'
+
+
+                echo "ARENE_TAG: ${ARENE_TAG}"
+                echo "DTEN_TAG: ${DTEN_TAG}"
+
+                script {
+                    // ARENE_TAGがdefaultの場合、mainブランチを取得
+                    if (ARENE_TAG == "default") {
+                        env.ARENE_TAG = "main"
+                    }
+
+                    // DTEN_TAGがdefaultの場合、最新タグを取得
+                    if (DTEN_TAG == "default") {
+                        env.DTEN_TAG = sh(script: "git describe --tags \$(git rev-list --tags --max-count=1)", returnStdout: true).trim()
+                    }
+                }
+
+                echo "ARENE_TAG: ${ARENE_TAG}"
+                echo "DTEN_TAG: ${DTEN_TAG}"
             }
         }
         stage('Set environment') {
