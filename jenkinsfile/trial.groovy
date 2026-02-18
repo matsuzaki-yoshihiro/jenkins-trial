@@ -1,10 +1,10 @@
 pipeline {
     agent any
 
-//    parameters {
-//        string(name: 'ARENE_TAG', defaultValue: "", description: '取り込むARENEのタグ e.g.v12.5.0')
-//        string(name: 'DTEN_TAG', defaultValue: "", description: '取り込むDTENのタグ e.g.0.20.0.0-rc.2')
-//    }
+    parameters {
+        string(name: 'ARENE_TAG', defaultValue: "default", description: '取り込むARENEのタグ e.g.v12.5.0')
+        string(name: 'DTEN_TAG', defaultValue: "default", description: '取り込むDTENのタグ e.g.0.20.0.0-rc.2')
+    }
 
     environment {
         // proxy setting
