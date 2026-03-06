@@ -97,6 +97,20 @@ pipeline {
                         ''', returnStdout: true).trim()
                     }
                     echo "CRON_SCHEDULE: ${CRON_SCHEDULE}"
+                    def NEXT_RUN_JST = ""
+                    if (CRON_SCHEDULE) {
+                        try {
+                            def hash = hudson.scheduler.Hash.from(env.JOB_NAME)
+                            def cronTabList = hudson.scheduler.CronTabList.create(CRON_SCHEDULE, hash)
+                            def nextCalendar = cronTabList.next()
+                            NEXT_RUN_JST = nextCalendar.getTime().format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("Asia/Tokyo"))
+                        } catch (Exception e) {
+                            NEXT_RUN_JST = "(failed to calculate next run: ${e.getClass().getSimpleName()})"
+                        }
+                    } else {
+                        NEXT_RUN_JST = "(no cron spec)"
+                    }
+                    echo "NEXT_RUN_JST: ${NEXT_RUN_JST}"
                     echo "TRIGGER_XML:\n${TRIGGER_XML}"
                     echo "TRIGGER_JSON: ${TRIGGER_JSON}"
 
