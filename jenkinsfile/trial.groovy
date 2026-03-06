@@ -54,22 +54,22 @@ pipeline {
                         env.DTEN_TAG = sh(script: "git describe --tags \$(git rev-list --tags --max-count=1)", returnStdout: true).trim()
                     }
 
-                    // このJOBに設定された定期実行の時間を取得する
-                    def CRON_SCHEDULE = sh(script: '''
-                    set -e
+                    // このJOBに設定された定期的に実行のスケジュールを取得
+                    def CRON_SCHEDULE = ""
+                    withCredentials([
+                        usernamePassword(credentialsId: "GENIIE_JENKINS_CREDS", passwordVariable: 'JENKINS_TOKEN', usernameVariable: 'JENKINS_USERNAME')
+                    ]) {
+                        CRON_SCHEDULE = sh(script: '''
+                        set -e
 
-                    CLI_JAR="${WORKSPACE}/jenkins-cli.jar"
-                    CLI_JAR_URL="${JENKINS_URL%/}/jnlpJars/jenkins-cli.jar"
+                        JOB_PATH=$(printf '%s' "${JOB_NAME}" | sed 's|/|/job/|g')
+                        CONFIG_URL="${JENKINS_URL%/}/job/${JOB_PATH}/config.xml"
 
-                    if [ ! -f "${CLI_JAR}" ]; then
-                        curl -fsSL "${CLI_JAR_URL}" -o "${CLI_JAR}"
-                    fi
-
-                    java -jar "${CLI_JAR}" -s "${JENKINS_URL}" get-job "${JOB_NAME}" \
-                    | grep -A1 '<triggers class="vector">' \
-                    | tail -n1 \
-                    | sed 's/.*<spec>\\(.*\\)<\\/spec>.*/\\1/'
-                    ''', returnStdout: true).trim()
+                        curl -fsSL --user "${JENKINS_USERNAME}:${JENKINS_TOKEN}" "${CONFIG_URL}" \
+                        | sed -n 's:.*<spec>\\(.*\\)</spec>.*:\\1:p' \
+                        | head -n1
+                        ''', returnStdout: true).trim()
+                    }
                     echo "CRON_SCHEDULE: ${CRON_SCHEDULE}"
                 }
 
