@@ -21,7 +21,11 @@ pipeline {
                 expression { return false }
             }
             steps {
-                sh './script/trap_test.sh'
+                sh '''
+                # 現在時刻の表示（YYYY-MM-DD HH:MM:SS形式）
+                echo "Current time: $(date '+%Y-%m-%d %H:%M:%S')"
+                ./script/trap_test.sh
+                '''
             }
         }
         stage('Show parameters') {
