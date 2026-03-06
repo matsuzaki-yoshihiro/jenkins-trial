@@ -17,9 +17,6 @@ pipeline {
 
     stages {
         stage('trap test') {
-            when {
-                expression { return false }
-            }
             steps {
                 sh '''
                 # 現在時刻の表示（YYYY-MM-DD HH:MM:SS形式）

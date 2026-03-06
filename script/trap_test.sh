@@ -12,5 +12,8 @@ touch "${MK_TEMP_DIR}/test_file.txt"
 echo "ls /tmp: $(ls /tmp -l)"
 echo "ls ${MK_TEMP_DIR}: $(ls ${MK_TEMP_DIR} -l)"
 
+# 現在時刻の表示（YYYY-MM-DD HH:MM:SS形式）
+echo "Current time: $(date '+%Y-%m-%d %H:%M:%S')"
+
 echo "Sleeping for 10 seconds..."
 sleep 10
