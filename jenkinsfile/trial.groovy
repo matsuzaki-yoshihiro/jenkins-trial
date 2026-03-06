@@ -57,9 +57,6 @@ pipeline {
             }
         }
         stage('Set environment') {
-            when {
-                expression { return false }
-            }
             steps {
                 withCredentials([
                     usernamePassword(credentialsId: "GENIIE_ARTIFACTORY_CREDS", passwordVariable: 'GENIIE_ART_APIKEY'     , usernameVariable: 'GENIIE_ART_ID'),
