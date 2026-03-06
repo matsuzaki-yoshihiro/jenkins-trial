@@ -58,20 +58,21 @@ pipeline {
                 echo "ARENE_TAG: ${ARENE_TAG}"
                 echo "DTEN_TAG: ${DTEN_TAG}"
 
-
-                // このJOBに設定されている定期実行の時刻を取得する
-                def job = Jenkins.instance.getItemByFullName(env.JOB_NAME)
-                // 定期実行のトリガーを取得して表示する
-                // 設定されていない場合は設定されていないと表示する
-                echo "定期実行のトリガーを表示します"
-                if (job.getTriggers().isEmpty())
-                {
-                    echo "No triggers found for this job."
-                }
-                else
-                {
-                    job.getTriggers().each { trigger ->
-                        echo "trigger: ${trigger.key} - ${trigger.value}"
+                script {
+                    // このJOBに設定されている定期実行の時刻を取得する
+                    def job = Jenkins.instance.getItemByFullName(env.JOB_NAME)
+                    // 定期実行のトリガーを取得して表示する
+                    // 設定されていない場合は設定されていないと表示する
+                    println "定期実行のトリガーを表示します"
+                    if (job.getTriggers().isEmpty())
+                    {
+                        println "No triggers found for this job."
+                    }
+                    else
+                    {
+                        job.getTriggers().each { trigger ->
+                            println "trigger: ${trigger.key} - ${trigger.value}"
+                        }
                     }
                 }
             }
