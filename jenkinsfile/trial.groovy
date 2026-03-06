@@ -55,7 +55,21 @@ pipeline {
                     }
 
                     // このJOBに設定された定期実行の時間を取得する
-                    def CRON_SCHEDULE = sh(script: "echo \"${env.JOB_NAME}\" | xargs -I {} java -jar jenkins-cli.jar -s ${env.JENKINS_URL} get-job {} | grep -A1 '<triggers class=\"vector\">' | tail -n1 | sed 's/.*<spec>\\(.*\\)<\\/spec>.*/\\1/'", returnStdout: true).trim()
+                    def CRON_SCHEDULE = sh(script: '''
+                    set -e
+
+                    CLI_JAR="${WORKSPACE}/jenkins-cli.jar"
+                    CLI_JAR_URL="${JENKINS_URL%/}/jnlpJars/jenkins-cli.jar"
+
+                    if [ ! -f "${CLI_JAR}" ]; then
+                        curl -fsSL "${CLI_JAR_URL}" -o "${CLI_JAR}"
+                    fi
+
+                    java -jar "${CLI_JAR}" -s "${JENKINS_URL}" get-job "${JOB_NAME}" \
+                    | grep -A1 '<triggers class="vector">' \
+                    | tail -n1 \
+                    | sed 's/.*<spec>\\(.*\\)<\\/spec>.*/\\1/'
+                    ''', returnStdout: true).trim()
                     echo "CRON_SCHEDULE: ${CRON_SCHEDULE}"
                 }
 
