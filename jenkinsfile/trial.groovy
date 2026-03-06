@@ -57,45 +57,9 @@ pipeline {
 
                 echo "ARENE_TAG: ${ARENE_TAG}"
                 echo "DTEN_TAG: ${DTEN_TAG}"
-
-                withCredentials([
-                    usernamePassword(credentialsId: "GENIIE_ARTIFACTORY_CREDS", passwordVariable: 'GENIIE_ART_APIKEY'     , usernameVariable: 'GENIIE_ART_ID'),
-                    usernamePassword(credentialsId: "GENIIE_WIKI_CREDS"       , passwordVariable: 'GENIIE_WIKI_TOKEN'     , usernameVariable: 'GENIIE_WIKI_ID'),
-                    usernamePassword(credentialsId: "GENIIE_JIRA_CREDS"       , passwordVariable: 'GENIIE_JIRA_TOKEN'     , usernameVariable: 'GENIIE_JIRA_ID'),
-                    usernamePassword(credentialsId: "GENIIE_GITLAB_CREDS"     , passwordVariable: 'GENIIE_GITLAB_PAT'     , usernameVariable: 'GENIIE_GITLAB_ID'),
-                    usernamePassword(credentialsId: "GITHUB_DTEN_CREDS"       , passwordVariable: 'GENIIE_GITHUB_PAT'     , usernameVariable: 'GENIIE_GITHUB_ID'),
-                    usernamePassword(credentialsId: "GITHUB_TMCSG_CREDS"      , passwordVariable: 'TMCSG_GITHUB_PAT'      , usernameVariable: 'TMCSG_GITHUB_ID'),
-                    usernamePassword(credentialsId: "GITHUB_WOVEN_CREDS"      , passwordVariable: 'TMCSG_GITHUB_EMU_TOKEN', usernameVariable: 'TMCSG_GITHUB_EMU_ID'),
-                    usernamePassword(credentialsId: "GIT_CODELINARO_CREDS"    , passwordVariable: 'CODELINARO_GITLAB_PAT' , usernameVariable: 'CODELINARO_GITLAB_ID'),
-                    usernamePassword(credentialsId: "TMCSG_ARTIFACTORY_CREDS" , passwordVariable: 'TMCSG_SAAS_ART_APIKEY' , usernameVariable: 'TMCSG_SAAS_ART_ID'),
-                    usernamePassword(credentialsId: "GENIIE_JENKINS_CREDS"    , passwordVariable: 'JENKINS_TOKEN'         , usernameVariable: 'JENKINS_USERNAME'),
-                    usernamePassword(credentialsId: "RC_BOT_CREDS"            , passwordVariable: 'RC_BOT_APIKEY'         , usernameVariable: 'RC_BOT_APIID'),
-                    usernamePassword(credentialsId: "CONFLUENCE_TMCSG_CREDS"  , passwordVariable: 'TMCSG_CONFLUENCE_PAT'  , usernameVariable: 'TMCSG_CONFLUENCE_ID')
-                    ]) {
-                    script {
-                        // このJOBに設定されている定期実行の時刻を取得する
-                        def job = Jenkins.instance.getItemByFullName(env.JOB_NAME)
-                        // 定期実行のトリガーを取得して表示する
-                        // 設定されていない場合は設定されていないと表示する
-                        println "定期実行のトリガーを表示します"
-                        if (job.getTriggers().isEmpty())
-                        {
-                            println "No triggers found for this job."
-                        }
-                        else
-                        {
-                            job.getTriggers().each { trigger ->
-                                println "trigger: ${trigger.key} - ${trigger.value}"
-                            }
-                        }
-                    }
-                }
             }
         }
         stage('Set environment') {
-            when {
-                expression { return false }
-            }
             steps {
                 withCredentials([
                     usernamePassword(credentialsId: "GENIIE_ARTIFACTORY_CREDS", passwordVariable: 'GENIIE_ART_APIKEY'     , usernameVariable: 'GENIIE_ART_ID'),
@@ -126,11 +90,24 @@ pipeline {
                         //echo "ARENE_MAIN_HASH=${ARENE_MAIN_HASH}"
                         //echo "TIER1_LATEST_HASH=${TIER1_LATEST_HASH}"
 
-                        def LOG_COMMENT = sh(script: "./script/edit_comment.sh \"arene-cockpit-sdk-26bev-repo\" \"main\" \"dn-cdc-lvgvm-26bev-repo\" \"${option}\" ", returnStdout: true).trim()
+                        // このJOBに設定されている定期実行の時刻を取得する
+                        def job = Jenkins.instance.getItemByFullName(env.JOB_NAME)
+                        // 定期実行のトリガーを取得して表示する
+                        // 設定されていない場合は設定されていないと表示する
+                        println "定期実行のトリガーを表示します"
+                        if (job.getTriggers().isEmpty())
+                        {
+                            println "No triggers found for this job."
+                        }
+                        else
+                        {
+                            job.getTriggers().each { trigger ->
+                                println "trigger: ${trigger.key} - ${trigger.value}"
+                            }
+                        }
 
-
-
-                        currentBuild.description = "${LOG_COMMENT}"
+                        //def LOG_COMMENT = sh(script: "./script/edit_comment.sh \"arene-cockpit-sdk-26bev-repo\" \"main\" \"dn-cdc-lvgvm-26bev-repo\" \"${option}\" ", returnStdout: true).trim()
+                        //currentBuild.description = "${LOG_COMMENT}"
                     }
                 }
             }
