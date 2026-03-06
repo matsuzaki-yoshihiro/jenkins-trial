@@ -53,6 +53,10 @@ pipeline {
                     if (DTEN_TAG == "default") {
                         env.DTEN_TAG = sh(script: "git describe --tags \$(git rev-list --tags --max-count=1)", returnStdout: true).trim()
                     }
+
+                    // このJOBに設定された定期実行の時間を取得する
+                    def CRON_SCHEDULE = sh(script: "echo \"${env.JOB_NAME}\" | xargs -I {} java -jar jenkins-cli.jar -s ${env.JENKINS_URL} get-job {} | grep -A1 '<triggers class=\"vector\">' | tail -n1 | sed 's/.*<spec>\\(.*\\)<\\/spec>.*/\\1/'", returnStdout: true).trim()
+                    echo "CRON_SCHEDULE: ${CRON_SCHEDULE}"
                 }
 
                 echo "ARENE_TAG: ${ARENE_TAG}"
@@ -60,6 +64,9 @@ pipeline {
             }
         }
         stage('Set environment') {
+            when {
+                expression { return false }
+            }
             steps {
                 withCredentials([
                     usernamePassword(credentialsId: "GENIIE_ARTIFACTORY_CREDS", passwordVariable: 'GENIIE_ART_APIKEY'     , usernameVariable: 'GENIIE_ART_ID'),
@@ -90,24 +97,8 @@ pipeline {
                         //echo "ARENE_MAIN_HASH=${ARENE_MAIN_HASH}"
                         //echo "TIER1_LATEST_HASH=${TIER1_LATEST_HASH}"
 
-                        // このJOBに設定されている定期実行の時刻を取得する
-                        def job = Jenkins.instance.getItemByFullName(env.JOB_NAME)
-                        // 定期実行のトリガーを取得して表示する
-                        // 設定されていない場合は設定されていないと表示する
-                        println "定期実行のトリガーを表示します"
-                        if (job.getTriggers().isEmpty())
-                        {
-                            println "No triggers found for this job."
-                        }
-                        else
-                        {
-                            job.getTriggers().each { trigger ->
-                                println "trigger: ${trigger.key} - ${trigger.value}"
-                            }
-                        }
-
-                        //def LOG_COMMENT = sh(script: "./script/edit_comment.sh \"arene-cockpit-sdk-26bev-repo\" \"main\" \"dn-cdc-lvgvm-26bev-repo\" \"${option}\" ", returnStdout: true).trim()
-                        //currentBuild.description = "${LOG_COMMENT}"
+                        def LOG_COMMENT = sh(script: "./script/edit_comment.sh \"arene-cockpit-sdk-26bev-repo\" \"main\" \"dn-cdc-lvgvm-26bev-repo\" \"${option}\" ", returnStdout: true).trim()
+                        currentBuild.description = "${LOG_COMMENT}"
                     }
                 }
             }
