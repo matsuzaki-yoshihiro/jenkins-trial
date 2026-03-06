@@ -92,6 +92,25 @@ pipeline {
 
                         def LOG_COMMENT = sh(script: "./script/edit_comment.sh \"arene-cockpit-sdk-26bev-repo\" \"main\" \"dn-cdc-lvgvm-26bev-repo\" \"${option}\" ", returnStdout: true).trim()
 
+                        // このJOBに設定されている定期実行の時刻を取得する
+                        def CRON_SCHEDULE = sh(script: "cat ${WORKSPACE}/Jenkinsfile | grep -A1 'triggers' | grep 'cron' | sed 's/.*cron(//;s/)//'", returnStdout: true).trim()
+                        LOG_COMMENT = "次回実行予定: ${CRON_SCHEDULE}\n${LOG_COMMENT}"
+
+                        def triggers = job.getTriggers()
+                        if(triggers.any { it.value instanceof hudson.triggers.TimerTrigger }) {
+                            println "job: ${job.name}"
+                            triggers.each { trigger ->
+                                if(trigger.value instanceof hudson.triggers.TimerTrigger) {
+                                    println "cron: ${trigger.value.spec}"
+                                }
+                            }
+                        } else {
+                            LOG_COMMENT = "定期実行のトリガーは設定されていません。\n${LOG_COMMENT}"
+                        }
+
+
+
+
                         currentBuild.description = "${LOG_COMMENT}"
                     }
                 }
