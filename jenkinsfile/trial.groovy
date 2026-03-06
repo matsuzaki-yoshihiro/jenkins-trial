@@ -54,8 +54,10 @@ pipeline {
                         env.DTEN_TAG = sh(script: "git describe --tags \$(git rev-list --tags --max-count=1)", returnStdout: true).trim()
                     }
 
-                    // このJOBに設定された定期的に実行のスケジュールを取得
+                    // このJOBに設定された定期実行情報（cron文字列 / trigger XML / trigger JSON）を取得
                     def CRON_SCHEDULE = ""
+                    def TRIGGER_XML = ""
+                    def TRIGGER_JSON = ""
                     withCredentials([
                         usernamePassword(credentialsId: "GENIIE_JENKINS_CREDS", passwordVariable: 'JENKINS_TOKEN', usernameVariable: 'JENKINS_USERNAME')
                     ]) {
@@ -69,8 +71,36 @@ pipeline {
                         | sed -n 's:.*<spec>\\(.*\\)</spec>.*:\\1:p' \
                         | head -n1
                         ''', returnStdout: true).trim()
+
+                        TRIGGER_XML = sh(script: '''
+                        set -e
+
+                        JOB_PATH=$(printf '%s' "${JOB_NAME}" | sed 's|/|/job/|g')
+                        CONFIG_URL="${JENKINS_URL%/}/job/${JOB_PATH}/config.xml"
+
+                        CONFIG_XML=$(curl -fsSL --user "${JENKINS_USERNAME}:${JENKINS_TOKEN}" "${CONFIG_URL}")
+
+                        if printf '%s\n' "${CONFIG_XML}" | grep -q '<triggers/>'; then
+                            printf '%s\n' '<triggers/>'
+                        else
+                            printf '%s\n' "${CONFIG_XML}" | sed -n '/<triggers/,/<\/triggers>/p'
+                        fi
+                        ''', returnStdout: true).trim()
+
+                        TRIGGER_JSON = sh(script: '''
+                        set -e
+
+                        JOB_PATH=$(printf '%s' "${JOB_NAME}" | sed 's|/|/job/|g')
+                        API_URL="${JENKINS_URL%/}/job/${JOB_PATH}/api/json"
+
+                        curl -fsSL --user "${JENKINS_USERNAME}:${JENKINS_TOKEN}" "${API_URL}"
+                        ''', returnStdout: true).trim()
                     }
                     echo "CRON_SCHEDULE: ${CRON_SCHEDULE}"
+                    echo "TRIGGER_XML:\n${TRIGGER_XML}"
+                    echo "TRIGGER_JSON: ${TRIGGER_JSON}"
+
+                    
                 }
 
                 echo "ARENE_TAG: ${ARENE_TAG}"
