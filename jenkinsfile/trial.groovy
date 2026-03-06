@@ -83,7 +83,7 @@ pipeline {
                         if printf '%s\n' "${CONFIG_XML}" | grep -q '<triggers/>'; then
                             printf '%s\n' '<triggers/>'
                         else
-                            printf '%s\n' "${CONFIG_XML}" | sed -n '\|<triggers|,\|</triggers>|p'
+                            printf '%s\n' "${CONFIG_XML}" | awk 'index($0,"<triggers"){f=1} f{print} index($0,"</triggers>"){f=0}'
                         fi
                         ''', returnStdout: true).trim()
 
