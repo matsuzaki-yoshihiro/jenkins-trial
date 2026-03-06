@@ -17,6 +17,9 @@ pipeline {
 
     stages {
         stage('trap test') {
+            when {
+                expression { return false }
+            }
             steps {
                 sh '''
                 # 現在時刻の表示（YYYY-MM-DD HH:MM:SS形式）
@@ -54,9 +57,29 @@ pipeline {
 
                 echo "ARENE_TAG: ${ARENE_TAG}"
                 echo "DTEN_TAG: ${DTEN_TAG}"
+
+
+                // このJOBに設定されている定期実行の時刻を取得する
+                def job = Jenkins.instance.getItemByFullName(env.JOB_NAME)
+                // 定期実行のトリガーを取得して表示する
+                // 設定されていない場合は設定されていないと表示する
+                echo "定期実行のトリガーを表示します"
+                if (job.getTriggers().isEmpty())
+                {
+                    echo "No triggers found for this job."
+                }
+                else
+                {
+                    job.getTriggers().each { trigger ->
+                        echo "trigger: ${trigger.key} - ${trigger.value}"
+                    }
+                }
             }
         }
         stage('Set environment') {
+            when {
+                expression { return false }
+            }
             steps {
                 withCredentials([
                     usernamePassword(credentialsId: "GENIIE_ARTIFACTORY_CREDS", passwordVariable: 'GENIIE_ART_APIKEY'     , usernameVariable: 'GENIIE_ART_ID'),
@@ -88,23 +111,6 @@ pipeline {
                         //echo "TIER1_LATEST_HASH=${TIER1_LATEST_HASH}"
 
                         def LOG_COMMENT = sh(script: "./script/edit_comment.sh \"arene-cockpit-sdk-26bev-repo\" \"main\" \"dn-cdc-lvgvm-26bev-repo\" \"${option}\" ", returnStdout: true).trim()
-
-                        // このJOBに設定されている定期実行の時刻を取得する
-                        def CRON_SCHEDULE = sh(script: "cat ${WORKSPACE}/Jenkinsfile | grep -A1 'triggers' | grep 'cron' | sed 's/.*cron(//;s/)//'", returnStdout: true).trim()
-                        LOG_COMMENT = "次回実行予定: ${CRON_SCHEDULE}\n${LOG_COMMENT}"
-
-                        def triggers = job.getTriggers()
-                        if(triggers.any { it.value instanceof hudson.triggers.TimerTrigger }) {
-                            println "job: ${job.name}"
-                            triggers.each { trigger ->
-                                if(trigger.value instanceof hudson.triggers.TimerTrigger) {
-                                    println "cron: ${trigger.value.spec}"
-                                }
-                            }
-                        } else {
-                            LOG_COMMENT = "定期実行のトリガーは設定されていません。\n${LOG_COMMENT}"
-                        }
-
 
 
 
